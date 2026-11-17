@@ -1,71 +1,80 @@
-# Definición de Tokens
-# for : 100
-# in : 110
-# : : 120
-# else : 130
-# ID : 600 (Representa target_list / expression_list)
-# SUITE : 700 (Representa el bloque indentado)
-# SIMPLE: 800 (Representa simple_stmt)
+# Tabla de tokens:
+#   for     : 100
+#   in      : 110
+#   :       : 120
+#   else    : 130
+#   ID      : 600
+#   SUITE   : 700
+#   SIMPLE  : 800
+
+vector = [100, 600, 110, 600, 120, 700, 130, 120, 700]
+
 def start(tokens):
     error = ''
     i = 0
-    # start = for_stmt
     i, error = for_stmt(tokens, i)
     if error != '':
         return error
     if i < len(tokens):
         return f"Error sintáctico: Símbolo inesperado '{tokens[i]}' en la posición {i}"
     return 'VÁLIDO'
+
 def for_stmt(tokens, i):
-    # Regla: 'for' target_list 'in' expression_list ':' body
-    if i < len(tokens) and tokens[i] == 100: # for
-        i += 1
+    if i < len(tokens) and tokens[i] == 100:
+        i = i + 1
     else:
-        return i, "Se esperaba 'for'"
+        return i, "Se esperaba la palabra clave 'for'"
 
-    if i < len(tokens) and tokens[i] == 600: # target_list
-        i += 1
+    if i < len(tokens) and tokens[i] == 600:
+        i = i + 1
     else:
-        return i, "Se esperaba target_list"
-    if i < len(tokens) and tokens[i] == 110: # in
-        i += 1
-    else:
-        return i, "Se esperaba 'in'"
+        return i, "Se esperaba un identificador (target_list)"
 
-    if i < len(tokens) and tokens[i] == 600: # expression_list
-        i += 1
+    if i < len(tokens) and tokens[i] == 110:
+        i = i + 1
     else:
-        return i, "Se esperaba expression_list"
+        return i, "Se esperaba la palabra clave 'in'"
 
-    if i < len(tokens) and tokens[i] == 120: # :
-        i += 1
+    if i < len(tokens) and tokens[i] == 600:
+        i = i + 1
     else:
-        return i, "Se esperaba ':'"
+        return i, "Se esperaba una expresión (expression_list)"
+
+    if i < len(tokens) and tokens[i] == 120:
+        i = i + 1
+    else:
+        return i, "Se esperaba ':' después de la expresión"
+
     i, error = body(tokens, i)
-    return i, error
+    if error != '':
+        return i, error
+
+    return i, ''
+
 def body(tokens, i):
-    # Regla: simple_stmt | suite [else ':' suite_else]
-    if i < len(tokens) and tokens[i] == 800: # simple_stmt (camino superior)
-        i += 1
+    if i < len(tokens) and tokens[i] == 800:
+        i = i + 1
         return i, ''
-    elif i < len(tokens) and tokens[i] == 700: # suite (camino inferior)
-        i += 1
-        if i < len(tokens) and tokens[i] == 130: # else (opcional)
-            i += 1
-            if i < len(tokens) and tokens[i] == 120: # :
-                i += 1
+        
+    elif i < len(tokens) and tokens[i] == 700:
+        i = i + 1
+        
+        if i < len(tokens) and tokens[i] == 130:
+            i = i + 1
+            
+            if i < len(tokens) and tokens[i] == 120:
+                i = i + 1
             else:
-                return i, "Se esperaba ':' después de else"
+                return i, "Se esperaba ':' después de 'else'"
                 
-            if i < len(tokens) and tokens[i] == 700: # suite_else
-                i += 1
+            if i < len(tokens) and tokens[i] == 700:
+                i = i + 1
             else:
-                return i, "Se esperaba bloque suite después de else:"
+                return i, "Se esperaba un bloque 'suite' después de 'else:'"
+                
         return i, ''
         
     else:
-        return i, "Se esperaba simple_stmt o suite después de ':'"
+        return i, "Se esperaba un bloque de instrucciones (simple_stmt o suite) después de ':'"
 
-# Vector de prueba: for i in lista : suite else : suite
-vector = [100, 600, 110, 600, 120, 700, 130, 120, 700]
-print("BUCLE FOR:", start(vector))
+print(start(vector))
