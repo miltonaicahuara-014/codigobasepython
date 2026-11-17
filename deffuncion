@@ -1,0 +1,58 @@
+# Definición de Tokens
+# def: 400
+# FUNC_NAME: 410
+# PARAM : 420
+# , : 430
+# ( : 250
+# ) : 260
+# : : 120
+# STATEMENT: 900 (Representa simple_stmt o bloque de código)
+def start(tokens):
+    error = ''
+    i = 0
+    i, error = def_funcion(tokens, i)
+    if error != '':
+        return error
+    if i < len(tokens):
+        return f"Error sintáctico: Símbolo inesperado '{tokens[i]}' en la posición {i}"
+    return 'VÁLIDO'
+def def_funcion(tokens, i):
+    # Regla: def function_name ( [parameter {, parameter}] ) : body
+    if i < len(tokens) and tokens[i] == 400: # def
+        i += 1
+    else:
+        return i, "Se esperaba 'def'"
+    if i < len(tokens) and tokens[i] == 410: # function_name
+        i += 1
+    else:
+        return i, "Se esperaba el nombre de la función"
+    if i < len(tokens) and tokens[i] == 250: # (
+        i += 1
+    else:
+        return i, "Se esperaba '('"
+    # Parámetros (opcionales)
+    if i < len(tokens) and tokens[i] == 420: # parameter
+        i += 1
+        while i < len(tokens) and tokens[i] == 430: # ,
+            i += 1
+            if i < len(tokens) and tokens[i] == 420: # parameter
+                i += 1
+            else:
+                return i, "Se esperaba un parámetro después de ','"
+    if i < len(tokens) and tokens[i] == 260: # )
+        i += 1
+    else:
+        return i, "Se esperaba ')'"
+    if i < len(tokens) and tokens[i] == 120: # :
+        i += 1
+    else:
+        return i, "Se esperaba ':'"
+    # Cuerpo de la función
+    if i < len(tokens) and tokens[i] == 900: # STATEMENT
+        i += 1
+        return i, ''
+    else:
+        return i, "Se esperaba el cuerpo de la función (statement)"
+# Vector de prueba: def mi_funcion ( param , param ) : statement
+vector = [400, 410, 250, 420, 430, 420, 260, 120, 900]
+print("DEFINICIÓN DE FUNCIÓN:", start(vector))
