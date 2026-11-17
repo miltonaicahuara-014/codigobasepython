@@ -1,0 +1,67 @@
+# Definición de Tokens
+# or : 200
+# and : 210
+# not : 220
+# True : 230
+# False: 240
+# ( : 250
+# ) : 260
+# TERMINO: 300 (Representa variables o números)
+def start(tokens):
+    error = ''
+    i = 0
+    i, error = expresion_logica(tokens, i)
+    if error != '':
+        return error
+    if i < len(tokens):
+        return f"Error sintáctico: Símbolo inesperado '{tokens[i]}' en la posición {i}"
+    return 'VÁLIDO'
+def expresion_logica(tokens, i):
+    # Regla: termino { (or | and) termino }
+    i, error = termino(tokens, i)
+    if error != '':
+        return i, error
+    while i < len(tokens) and tokens[i] in (200, 210): # or | and
+        i += 1 # Consumimos operador
+        i, error = termino(tokens, i)
+        if error != '':
+            return i, error
+    return i, ''
+def termino(tokens, i):
+    # Regla: factor { and factor }
+    i, error = factor(tokens, i)
+    if error != '':
+        return i, error
+    while i < len(tokens) and tokens[i] == 210: # and
+        i += 1
+        i, error = factor(tokens, i)
+        if error != '':
+            return i, error
+    return i, ''
+def factor(tokens, i):
+    # Regla: not factor | ( expresion_logica ) | True | False | TERMINO
+    if i < len(tokens) and tokens[i] == 220: # not
+        i += 1
+        i, error = factor(tokens, i)
+        return i, error
+    elif i < len(tokens) and tokens[i] == 250: # (
+        i += 1
+        i, error = expresion_logica(tokens, i)
+        if error != '':
+            return i, error
+        if i < len(tokens) and tokens[i] == 260: # )
+            i += 1
+        else:
+            return i, "Se esperaba un paréntesis de cierre ')'"
+        return i, ''
+    elif i < len(tokens) and tokens[i] in (230, 240): # True | False
+        i += 1
+        return i, ''
+    elif i < len(tokens) and tokens[i] == 300: # TERMINO
+        i += 1
+        return i, ''
+    else:
+        return i, "Se esperaba una expresión lógica válida"
+# Vector de prueba: ( variable or True ) and not False
+vector = [250, 300, 200, 230, 260, 210, 220, 240]
+print("EXPRESIÓN LÓGICA:", start(vector))
